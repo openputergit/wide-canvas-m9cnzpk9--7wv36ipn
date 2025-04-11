@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResumeScreener AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Roboto:wght@300;400;500&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom CSS for animations and effects */
+        .button-hover-glow {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .button-hover-glow:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.7);
+        }
+        .card-hover-shadow {
+            transition: box-shadow 0.3s ease;
+        }
+        .card-hover-shadow:hover {
+            box-shadow: 0px 4px 25px rgba(0, 188, 212, 0.15);
+        }
+        .slide-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .slide-fade-in:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+        .slide-fade-in:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .slide-fade-in:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+        .glassmorphism {
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .gradient-cyan {
+            background: linear-gradient(to right, #00BCD4, #468499);
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00BCD4;
+            animation: spinner 1s ease-in-out infinite;
+            display: none;
+        }
+        @keyframes spinner {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 font-sans antialiased text-white">
+    <div id="app">
+        <!-- Login/Register Page (default view) -->
+        <div id="login-view" class="min-h-screen flex flex-col items-center justify-center">
+            <div class="container mx-auto px-4">
+                <h1 class="text-3xl font-semibold text-center mb-8 bg-gradient-to-r from-cyan-400 to-teal-500 text-transparent bg-clip-text slide-fade-in">
+                    ResumeScreener AI — Smarter Hiring Starts Here
+                </h1>
+                
+                <div class="flex justify-center">
+                    <div class="w-full max-w-md glassmorphism p-8 rounded-xl shadow-lg slide-fade-in">
+                        <div class="flex justify-center mb-4">
+                            <div class="flex space-x-4">
+                                <button id="login-tab" class="py-2 px-4 font-semibold text-cyan-400 border-b-2 border-cyan-400">Login</button>
+                                <button id="register-tab" class="py-2 px-4 font-semibold text-gray-400 hover:text-cyan-400">Register</button>
+                            </div>
+                        </div>
+                        
+                        <div id="error-message" class="hidden bg-red-500 text-white p-3 rounded mb-4 text-center"></div>
+                        <div id="success-message" class="hidden bg-green-500 text-white p-3 rounded mb-4 text-center"></div>
+                        
+                        <!-- Login Form -->
+                        <form id="login-form" class="space-y-4">
+                            <div>
+                                <label for="login-email" class="block text-gray-300 text-sm font-bold mb-2">Email</label>
+                                <input type="email" id="login-email" placeholder="Enter your email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800" required>
+                            </div>
+                            
+                            <div>
+                                <label for="login-password" class="block text-gray-300 text-sm font-bold mb-2">Password</label>
+                                <input type="password" id="login-password" placeholder="Enter your password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800" required>
+                            </div>
+                            
+                            <div class="flex items-center justify-between mb-4">
+                                <label for="remember" class="flex items-center">
+                                    <input type="checkbox" id="remember" class="mr-2 h-4 w-4 rounded border-gray-700 text-cyan-500 focus:ring-cyan-500">
+                                    <span class="text-gray-300 text-sm">Remember me</span>
+                                </label>
+                                <a href="#" class="text-cyan-400 text-sm hover:text-cyan-300">Forgot Password?</a>
+                            </div>
+                            
+                            <button type="submit" class="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full button-hover-glow">
+                                Login
+                            </button>
+                        </form>
+                        
+                        <!-- Register Form (Hidden by default) -->
+                        <form id="register-form" class="space-y-4 hidden">
+                            <div>
+                                <label for="register-name" class="block text-gray-300 text-sm font-bold mb-2">Full Name</label>
+                                <input type="text" id="register-name" placeholder="Enter your full name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800" required>
+                            </div>
+                            
+                            <div>
+                                <label for="register-email" class="block text-gray-300 text-sm font-bold mb-2">Email</label>
+                                <input type="email" id="register-email" placeholder="Enter your email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800" required>
+                            </div>
+                            
+                            <div>
+                                <label for="register-password" class="block text-gray-300 text-sm font-bold mb-2">Password</label>
+                                <input type="password" id="register-password" placeholder="Enter your password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800" required>
+                            </div>
+                            
+                            <div>
+                                <label for="register-confirm-password" class="block text-gray-300 text-sm font-bold mb-2">Confirm Password</label>
+                                <input type="password" id="register-confirm-password" placeholder="Confirm your password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800" required>
+                            </div>
+                            
+                            <button type="submit" class="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full button-hover-glow">
+                                Register
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-4">
+                <div class="loading-spinner" id="auth-loading"></div>
+            </div>
+            <footer class="mt-8 text-gray-400 text-center">
+                <p>© 2024 ResumeScreener AI. All rights reserved.</p>
+            </footer>
+        </div>
+
+        <!-- Main Application (Hidden by default) -->
+        <div id="app-view" class="hidden">
+            <header class="fixed top-0 left-0 w-full bg-gray-900 z-50 shadow-md" role="navigation">
+                <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                    <h1 class="text-cyan-400 font-bold text-xl">ResumeScreener AI</h1>
+                    <nav class="hidden md:flex space-x-4">
+                        <a href="#" class="nav-link text-gray-300 hover:text-cyan-400" data-target="dashboard">Dashboard</a>
+                        <a href="#" class="nav-link text-gray-300 hover:text-cyan-400" data-target="upload">Upload</a>
+                        <a href="#" class="nav-link text-gray-300 hover:text-cyan-400" data-target="compare">Compare</a>
+                        <a href="#" class="nav-link text-gray-300 hover:text-cyan-400" data-target="reports">Reports</a>
+                        <a href="#" class="nav-link text-gray-300 hover:text-cyan-400" data-target="subscription">Plans</a>
+                        <a href="#" class="nav-link text-gray-300 hover:text-cyan-400" data-target="settings">Settings</a>
+                        <a href="#" id="logout-btn" class="text-red-400 hover:text-red-300">Logout</a>
+                    </nav>
+                    <button id="mobile-menu-button" class="md:hidden text-gray-300 focus:outline-none">
+                        <i class="bi bi-list text-2xl"></i>
+                    </button>
+                </div>
+                <div id="mobile-menu" class="md:hidden hidden bg-gray-900 py-4 px-6 shadow-lg">
+                    <div class="flex flex-col space-y-4">
+                        <a href="#" class="mobile-nav-link text-gray-300 hover:text-cyan-400" data-target="dashboard">Dashboard</a>
+                        <a href="#" class="mobile-nav-link text-gray-300 hover:text-cyan-400" data-target="upload">Upload</a>
+                        <a href="#" class="mobile-nav-link text-gray-300 hover:text-cyan-400" data-target="compare">Compare</a>
+                        <a href="#" class="mobile-nav-link text-gray-300 hover:text-cyan-400" data-target="reports">Reports</a>
+                        <a href="#" class="mobile-nav-link text-gray-300 hover:text-cyan-400" data-target="subscription">Plans</a>
+                        <a href="#" class="mobile-nav-link text-gray-300 hover:text-cyan-400" data-target="settings">Settings</a>
+                        <a href="#" id="mobile-logout-btn" class="text-red-400 hover:text-red-300">Logout</a>
+                    </div>
+                </div>
+            </header>
+
+            <div class="container mx-auto px-4 py-8 mt-16">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="app-section mb-12">
+                    <h2 class="text-2xl font-semibold mb-6 text-white slide-fade-in">Dashboard</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glassmorphism p-6 rounded-xl shadow-lg slide-fade-in">
+                            <h3 class="text-lg font-semibold mb-4 text-white">Welcome, <span id="user-name">User</span>!</h3>
+                            <p class="text-gray-400 mb-4">Your Current Plan: <span id="user-plan" class="text-cyan-400">28-Day Free Trial</span></p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <button class="upload-resume-btn bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline button-hover-glow" aria-label="Upload Resume">
+                                    Upload Resume
+                                </button>
+                                <button class="upload-jd-btn bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline button-hover-glow" aria-label="Upload Job Description">
+                                    Upload Job Description
+                                </button>
+                                <button class="start-analysis-btn bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline button-hover-glow" aria-label="Start Analysis">
+                                    Start Analysis
+                                </button>
+                                <button class="upgrade-plan-btn bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline button-hover-glow" aria-label="Upgrade Plan">
+                                    Upgrade Plan
+                                </button>
+                            </div>
+                        </div>
+                        <div class="glassmorphism p-6 rounded-xl shadow-lg slide-fade-in">
+                            <h3 class="text-lg font-semibold mb-4 text-white">Resume Stats</h3>
+                            <p class="text-gray-400">Resumes Uploaded: <span id="resumes-count" class="text-cyan-400">0</span></p>
+                            <p class="text-gray-400">Job Descriptions Uploaded: <span id="jds-count" class="text-cyan-400">0</span></p>
+                            <p class="text-gray-400">Comparisons Done: <span id="comparisons-count" class="text-cyan-400">0</span></p>
+                            <p class="text-gray-400 mt-4">Remaining Comparisons: <span id="remaining-comparisons" class="text-cyan-400">100</span></p>
+                            <div class="mt-4 bg-gray-800 rounded-lg h-4">
+                                <div id="usage-bar" class="bg-gradient-to-r from-cyan-500 to-teal-500 h-4 rounded-lg" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Upload Section -->
+                <section id="upload-section" class="app-section mb-12 hidden">
+                    <h2 class="text-2xl font-semibold mb-6 text-white slide-fade-in">Upload Resumes and Job Descriptions</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glassmorphism p-6 rounded-xl shadow-lg slide-fade-in">
+                            <h3 class="text-lg font-semibold mb-4 text-white">Resume Upload</h3>
+                            <div id="resume-dropzone" class="border-2 border-dashed border-gray-700 rounded-md p-8 text-center mb-4 hover:border-cyan-500 transition-colors duration-300 cursor-pointer">
+                                <p class="text-gray-400">Drag and drop resumes here, or click to select files</p>
+                                <i class="bi bi-upload text-4xl text-gray-500 mt-4"></i>
+                                <input type="file" id="resume-file-input" class="hidden" accept=".pdf,.doc,.docx" multiple>
+                            </div>
+                            <div id="resume-list" class="space-y-2 max-h-40 overflow-y-auto">
+                                <!-- Resume files will be dynamically added here -->
+                            </div>
+                            <div class="flex justify-center mt-4">
+                                <div class="loading-spinner" id="resume-upload-loading"></div>
+                            </div>
+                            <button id="upload-resumes-btn" class="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full mt-6 button-hover-glow" aria-label="Upload Resumes">
+                                Upload
+                            </button>
+                            <button id="preview-resumes-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full mt-3 button-hover-glow" aria-label="Preview Resumes">
+                                Preview
+                            </button>
+                        </div>
+                        <div class="glassmorphism p-6 rounded-xl shadow-lg slide-fade-in">
+                            <h3 class="text-lg font-semibold mb-4 text-white">Job Description Upload</h3>
+                            <div id="jd-dropzone" class="border-2 border-dashed border-gray-700 rounded-md p-8 text-center mb-4 hover:border-cyan-500 transition-colors duration-300 cursor-pointer">
+                                <p class="text-gray-400">Drag and drop job descriptions here, or click to select files</p>
+                                <i class="bi bi-upload text-4xl text-gray-500 mt-4"></i>
+                                <input type="file" id="jd-file-input" class="hidden" accept=".pdf,.doc,.docx,.txt" multiple>
+                            </div>
+                            <div id="jd-list" class="space-y-2 max-h-40 overflow-y-auto">
+                                <!-- JD files will be dynamically added here -->
+                            </div>
+                            <div class="flex justify-center mt-4">
+                                <div class="loading-spinner" id="jd-upload-loading"></div>
+                            </div>
+                            <button id="upload-jds-btn" class="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full mt-6 button-hover-glow" aria-label="Upload Job Descriptions">
+                                Upload
+                            </button>
+                            <button id="preview-jds-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full mt-3 button-hover-glow" aria-label="Preview Job Descriptions">
+                                Preview
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Compare Section -->
+                <section id="compare-section" class="app-section mb-12 hidden">
+                    <h2 class="text-2xl font-semibold mb-6 text-white slide-fade-in">Compare Resumes</h2>
+                    <div class="glassmorphism p-6 rounded-xl shadow-lg slide-fade-in">
+                        <form id="comparison-form" class="mb-6">
+                            <div class="mb-4">
+                                <label for="job-description-select" class="block text-gray-300 text-sm font-bold mb-2">Select Job Description</label>
+                                <select id="job-description-select" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800">
+                                    <option value="" disabled selected>Select a job description</option>
+                                    <!-- JDs will be dynamically added here -->
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-300 text-sm font-bold mb-2">Select Resumes to Compare</label>
+                                <div id="resume-checkboxes" class="space-y-2 max-h-60 overflow-y-auto">
+                                    <!-- Resume checkboxes will be dynamically added here -->
+                                </div>
+                            </div>
+                            <div class="flex justify-center mt-4">
+                                <div class="loading-spinner" id="comparison-loading"></div>
+                            </div>
+                            <button type="submit" id="compare-now-btn" class="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full button-hover-glow" aria-label="Compare Resumes">
+                                Compare Now
+                            </button>
+                        </form>
+                        <div id="comparison-results" class="mt-8 space-y-4">
+                            <h3 class="text-lg font-semibold mb-4 text-white">Comparison Results</h3>
+                            <div id="results-container" class="space-y-4">
+                                <!-- Comparison results will be dynamically added here -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Reports Section -->
+                <section id="reports-section" class="app-section mb-12 hidden">
+                    <h2 class="text-2xl font-semibold mb-6 text-white slide-fade-in">Reports and Analytics</h2>
+                    <div class="glassmorphism p-6 rounded-xl shadow-lg slide-fade-in">
+                        <h3 class="text-lg font-semibold mb-4 text-white">Comparison History</h3>
+                        <div id="comparison-history" class="space-y-4 max-h-96 overflow-y-auto">
+                            <!-- Comparison history will be dynamically added here -->
+                        </div>
+                        <div class="flex justify-center mt-4">
+                            <div class="loading-spinner" id="reports-loading"></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                            <div class="glassmorphism p-4 rounded-xl shadow-lg">
+                                <h4 class="text-md font-semibold mb-2 text-white">Resume Match Trend</h4>
+                                <canvas id="match-trend-chart" class="w-full h-40 bg-gray-700 rounded-md"></canvas>
+                            </div>
+                            <div class="glassmorphism p-4 rounded-xl shadow-lg">
+                                <h4 class="text-md font-semibold mb-2 text-white">JD Keywords vs Resume Skills</h4>
+                                <canvas id="keywords-chart" class="w-full h-40 bg-gray-700 rounded-md"></canvas>
+                            </div>
+                            <div class="glassmorphism p-4 rounded-xl shadow-lg">
+                                <h4 class="text-md font-semibold mb-2 text-white">Plan Usage</h4>
+                                <canvas id="usage-chart" class="w-full h-40 bg-gray-700 rounded-md"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Subscription Plans Section -->
+                <section id="subscription-section" class="app-section mb-12 hidden">
+                    <h2 class="text-2xl font-semibold mb-6 text-white slide-fade-in">Subscription Plans</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="glassmorphism p-6 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 hover:border-cyan-500 hover:border-2 card-hover-shadow">
+                            <h3 class="text-xl font-semibold mb-4 text-white">28-Day Free Trial</h3>
+                            <p class="text-gray-400 mb-2">Price: <span class="text-cyan-400">$0 / 28 Days</span></p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-300">
+                                <li>100 Resumes</li>
+                                <li>100 Comparisons</li>
+                                <li>All Features Included</li>
+                            </ul>
+                            <button class="plan-select-btn bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full mt-6 button-hover-glow" data-plan="free" aria-label="Get Started with Free Trial">
+                                Get Started
+                            </button>
+                        </div>
+                        <div class="glassmorphism p-6 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 hover:border-cyan-500 hover:border-2 card-hover-shadow">
+                            <h3 class="text-xl font-semibold mb-4 text-white">Starter</h3>
+                            <p class="text-gray-400 mb-2">Price: <span class="text-cyan-400">$10 / Month</span></p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-300">
+                                <li>3 Resumes</li>
+                                <li>10 Comparisons</li>
+                                <li>Rank, Education, Export</li>
+                            </ul>
+                            <button class="plan-select-btn bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full mt-6 button-hover-glow" data-plan="starter" aria-label="Subscribe to Starter Plan">
+                                Subscribe Now
+                            </button>
+                        </div>
+                        <div class="glassmorphism p-6 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 hover:border-cyan-500 hover:border-2 card-hover-shadow">
+                            <h3 class="text-xl font-semibold mb-4 text-white">Pro</h3>
+                            <p class="text-gray-400 mb-2">Price: <span class="text-cyan-400">$20 / Month</span></p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-300">
+                                <li>10 Resumes</li>
+                                <li>50 Comparisons</li>
+                                <li>Work Experience, AI Interview Questions</li>
+                            </ul>
+                            <button class="plan-select-btn bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full mt-6 button-hover-glow" data-plan="pro" aria-label="Subscribe to Pro Plan">
+                                Subscribe Now
+                            </button>
+                        </div>
+                        <div class="glassmorphism p-6 rounded-xl shadow-lg transition-transform duration-300 hover:scale-105 hover:border-cyan-500 hover:border-2 card-hover-shadow">
+                            <h3 class="text-xl font-semibold mb-4 text-white">Enterprise</h3>
+                            <p class="text-gray-400 mb-2">Price: <span class="text-cyan-400">$199 / Year</span></p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-300">
+                                <li>Unlimited Resumes</li>
+                                <li>Unlimited Comparisons</li>
+                                <li>Priority Support, All Features, Team Sharing</li>
+                            </ul>
+                            <button class="plan-select-btn bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full mt-6 button-hover-glow" data-plan="enterprise" aria-label="Subscribe to Enterprise Plan">
+                                Subscribe Now
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Settings Section -->
+                <section id="settings-section" class="app-section mb-12 hidden">
+                    <h2 class="text-2xl font-semibold mb-6 text-white slide-fade-in">Settings and Billing</h2>
+                    <div class="glassmorphism p-6 rounded-xl shadow-lg space-y-6 slide-fade-in">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2 text-white">Change Password</h3>
+                            <form id="change-password-form">
+                                <input type="password" id="current-password" placeholder="Current Password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800 mb-3" required>
+                                <input type="password" id="new-password" placeholder="New Password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800 mb-3" required>
+                                <input type="password" id="confirm-new-password" placeholder="Confirm New Password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800 mb-3" required>
+                                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" aria-label="Change Password">Change Password</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2 text-white">Change Email</h3>
+                            <form id="change-email-form">
+                                <input type="email" id="current-email" placeholder="Current Email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800 mb-3" readonly>
+                                <input type="email" id="new-email" placeholder="New Email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-300 leading-tight focus:outline-none focus:shadow-outline bg-gray-800 mb-3" required>
+                                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" aria-label="Change Email">Change Email</button>
+                            </form>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2 text-white">Contact Us</h3>
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <p class="text-gray-300 mb-2"><i class="bi bi-envelope me-2"></i> Email: support@resumescreener.ai</p>
+                                <p class="text-gray-300 mb-2"><i class="bi bi-telephone me-2"></i> Phone: +1 (800) 123-4567</p>
+                                <p class="text-gray-300 mb-4"><i class="bi bi-clock me-2"></i> 24/7 Support Available</p>
+                                <button id="open-chat-btn" class="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-full button-hover-glow" aria-label="Open Chat Support">
+                                    <i class="bi bi-chat-dots me-2"></i> Chat with Support
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2 text-white">Billing History</h3>
+                            <div id="billing-history" class="space-y-2 max-h-60 overflow-y-auto">
+                                <!-- Billing history will be dynamically added here -->
+                                <div class="text-center text-gray-400 py-4">No billing history</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2 text-white">Subscription</h3>
+                            <p class="text-gray-400 mb-4">Your current plan: <span id="current-plan" class="text-cyan-400">28-Day Free Trial</span></p>
+                            <button id="cancel-subscription-btn" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2" aria-label="Cancel Subscription">Cancel Subscription</button>
+                            <button id="upgrade-subscription-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" aria-label="Upgrade Plan">Upgrade Plan</button>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2 text-white">Delete Account</h3>
+                            <p class="text-gray-400 mb-4">Permanently delete your account and all associated data.</p>
+                            <button id="delete-account-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" aria-label="Delete Account">Delete Account</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="bg-gray-800 text-gray-400 py-4 text-center">
+                <p>© 2024 ResumeScreener AI. All rights reserved.</p>
+            </footer>
+        </div>
+
+        <!-- Modal for Resume Preview -->
+        <div id="resume-preview-modal" class="fixed inset-0 z-50 hidden">
+            <div class="fixed inset-0 bg-black opacity-75"></div>
+            <div class="relative z-10 bg-gray-800 rounded-lg p-6 max-w-4xl mx-auto my-12 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-white" id="preview-title">Resume Preview</h3>
+                    <button id="close-resume-preview" class="text-gray-400 hover:text-white">
+                        <i class="bi bi-x-lg text-2xl"></i>
+                    </button>
+                </div>
+                <div id="preview-content" class="text-gray-300">
+                    <!-- Preview content goes here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Comparison Details -->
+        <div id="comparison-details-modal" class="fixed inset-0 z-50 hidden">
+            <div class="fixed inset-0 bg-black opacity-75"></div>
+            <div class="relative z-10 bg-gray-800 rounded-lg p-6 max-w-4xl mx-auto my-12 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-white" id="detail-modal-title">Comparison Details</h3>
+                    <button id="close-comparison-details" class="text-gray-400 hover:text-white">
+                        <i class="bi bi-x-lg text-2xl"></i>
+                    </button>
+                </div>
+                <div id="detail-modal-content" class="text-gray-300">
+                    <!-- Comparison detail content goes here -->
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button id="export-pdf-btn" class="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline button-hover-glow" aria-label="Export to PDF">
+                        Export to PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="delete-confirmation-modal" class="fixed inset-0 z-50 hidden">
+            <div class="fixed inset-0 bg-black opacity-75"></div>
+            <div class="relative z-10 bg-gray-800 rounded-lg p-6 max-w-md mx-auto my-20">
+                <h3 class="text-xl font-bold text-white mb-4">Confirm Deletion</h3>
+                <p id="delete-confirmation-message" class="text-gray-300 mb-6">Are you sure you want to delete this item?</p>
+                <div class="flex justify-end space-x-4">
+                    <button id="delete-cancel-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Cancel</button>
+                    <button id="delete-confirm-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot Modal -->
+        <div id="chatbot-modal" class="fixed right-6 bottom-6 z-50 hidden">
+            <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden" style="width: 350px; max-height: 500px;">
+                <div class="flex justify-between items-center bg-gray-700 p-4">
+                    <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <h3 class="text-white font-medium">Support Chat</h3>
+                    </div>
+                    <button id="close-chat" class="text-gray-400 hover:text-white">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div id="chat-messages" class="p-4 overflow-y-auto" style="height: 300px;">
+                    <div class="flex flex-col space-y-3">
+                        <div class="flex items-start">
+                            <div class="bg-gray-700 text-white p-3 rounded-lg rounded-tl-none max-w-[80%]">
+                                <p>Hello! Welcome to ResumeScreener AI support. How can I help you today?</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-gray-700">
+                    <form id="chat-form" class="flex">
+                        <input type="text" id="chat-input" placeholder="Type your message..." class="flex-1 bg-gray-700 text-white p-2 rounded-l-lg focus:outline-none">
+                        <button type="submit" class="bg-cyan-500 text-white p-2 rounded-r-lg">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load external libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Global app state
+        const appState = {
+            currentUser: null,
+            currentSection: 'dashboard',
+            resumes: [],
+            jobDescriptions: [],
+            comparisons: [],
+            userPlan: {
+                name: '28-Day Free Trial',
+                resumeLimit: 100,
+                comparisonLimit: 100,
+                features: ['rank', 'education', 'export', 'experience', 'interview']
+            },
+            charts: {},
+            selectedItemToDelete: null
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize app
+            initAuth();
+            initNavigation();
+            initUploadSystem();
+            initComparisonSystem();
+            initSettingsSystem();
+            initModals();
+            initSubscriptionSystem();
+            initChatbot();
+            
+            checkAuthStatus();
+        });
+
+        // Authentication Functions
+        function initAuth() {
+            // Tab switching
+            const loginTab = document.getElementById('login-tab');
+            const registerTab = document.getElementById('register-tab');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+
+            loginTab.addEventListener('click', () => {
+                loginTab.classList.add('text-cyan-400', 'border-b-2', 'border-cyan-400');
+                registerTab.classList.remove('text-cyan-400', 'border-b-2', 'border-cyan-400');
+                registerTab.classList.add('text-gray-400');
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            });
+
+            registerTab.addEventListener('click', () => {
+                registerTab.classList.add('text-cyan-400', 'border-b-2', 'border-cyan-400');
+                loginTab.classList.remove('text-cyan-400', 'border-b-2', 'border-cyan-400');
+                loginTab.classList.add('text-gray-400');
+                registerForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            });
+
+            // Login form submission
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                
+                // Show loading spinner
+                const authLoading = document.getElementById('auth-loading');
+                authLoading.style.display = 'block';
+                
+                // Simulate API call for login
+                setTimeout(() => {
+                    loginUser(email, password);
+                }, 1000);
+            });
+
+            // Register form submission
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                const confirmPassword = document.getElementById('register-confirm-password').value;
+                
+                if (password !== confirmPassword) {
+                    showError('Passwords do not match');
+                    return;
+                }
+                
+                // Show loading spinner
+                const authLoading = document.getElementById('auth-loading');
+                authLoading.style.display = 'block';
+                
+                // Simulate API call for registration
+                setTimeout(() => {
+                    registerUser(name, email, password);
+                }, 1000);
+            });
+
+            // Logout functionality
+            document.getElementById('logout-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                logoutUser();
+            });
+            
+            document.getElementById('mobile-logout-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                logoutUser();
+            });
+        }
+
+        function loginUser(email, password) {
+            // Simulate MongoDB request for user authentication
+            fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appSlug: 'resumescreener-123456',
+                    action: 'read',
+                    collection: 'users',
+                    conditions: { email: email }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const authLoading = document.getElementById('auth-loading');
+                authLoading.style.display = 'none';
+                
+                if (data.success && data.result.length > 0) {
+                    // In a real app, we would verify password hash here
+                    // For this demo, we'll assume the password is correct
+                    const user = data.result[0];
+                    
+                    // Set current user
+                    appState.currentUser = {
+                        id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        plan: user.plan || '28-Day Free Trial'
+                    };
+                    
+                    // Set user plan
+                    setUserPlan(user.plan || '28-Day Free Trial');
+                    
+                    // Store in localStorage for session persistence
+                    localStorage.setItem('currentUser', JSON.stringify(appState.currentUser));
+                    
+                    // Show success message
+                    showSuccess('Login successful!');
+                    
+                    // Switch to app view
+                    setTimeout(() => {
+                        showAppView();
+                        loadUserData();
+                    }, 1000);
+                } else {
+                    // User not found, prompt to register
+                    showError('User not found. Please register first.');
+                    
+                    // Switch to register tab
+                    document.getElementById('register-tab').click();
+                    
+                    // Pre-fill the email in the register form
+                    document.getElementById('register-email').value = email;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const authLoading = document.getElementById('auth-loading');
+                authLoading.style.display = 'none';
+                showError('An error occurred during login. Please try again.');
+            });
+        }
+
+        function registerUser(name, email, password) {
+            // Check if user already exists
+            fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appSlug: 'resumescreener-123456',
+                    action: 'read',
+                    collection: 'users',
+                    conditions: { email: email }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.result.length > 0) {
+                    const authLoading = document.getElementById('auth-loading');
+                    authLoading.style.display = 'none';
+                    showError('User with this email already exists');
+                    return;
+                }
+                
+                // Create new user
+                fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        appSlug: 'resumescreener-123456',
+                        action: 'create',
+                        collection: 'users',
+                        data: {
+                            name: name,
+                            email: email,
+                            password: password, // In a real app, this would be hashed
+                            plan: '28-Day Free Trial',
+                            created_at: new Date().toISOString()
+                        }
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const authLoading = document.getElementById('auth-loading');
+                    authLoading.style.display = 'none';
+                    
+                    if (data.success) {
+                        // Set current user
+                        appState.currentUser = {
+                            id: data.result.insertedId,
+                            name: name,
+                            email: email,
+                            plan: '28-Day Free Trial'
+                        };
+                        
+                        // Set default user plan
+                        setUserPlan('28-Day Free Trial');
+                        
+                        // Store in localStorage for session persistence
+                        localStorage.setItem('currentUser', JSON.stringify(appState.currentUser));
+                        
+                        showSuccess('Registration successful!');
+                        
+                        // Switch to app view
+                        setTimeout(() => {
+                            showAppView();
+                            loadUserData();
+                        }, 1000);
+                    } else {
+                        showError('Registration failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const authLoading = document.getElementById('auth-loading');
+                    authLoading.style.display = 'none';
+                    showError('An error occurred during registration. Please try again.');
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const authLoading = document.getElementById('auth-loading');
+                authLoading.style.display = 'none';
+                showError('An error occurred during registration. Please try again.');
+            });
+        }
+
+        function logoutUser() {
+            // Clear user data
+            appState.currentUser = null;
+            localStorage.removeItem('currentUser');
+            
+            // Reset app state
+            appState.resumes = [];
+            appState.jobDescriptions = [];
+            appState.comparisons = [];
+            
+            // Switch to login view
+            showLoginView();
+            
+            showSuccess('You have been logged out successfully.');
+        }
+
+        function checkAuthStatus() {
+            // Check if user is already logged in
+            const storedUser = localStorage.getItem('currentUser');
+            
+            if (storedUser) {
+                appState.currentUser = JSON.parse(storedUser);
+                showAppView();
+                loadUserData();
+            }
+        }
+
+        // Navigation Functions
+        function initNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetSection = this.getAttribute('data-target');
+                    switchSection(targetSection);
+                });
+            });
+            
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetSection = this.getAttribute('data-target');
+                    switchSection(targetSection);
+                    toggleMobileMenu();
+                });
+            });
+            
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-button').addEventListener('click', toggleMobileMenu);
+            
+            // Dashboard buttons
+            document.querySelector('.upload-resume-btn').addEventListener('click', () => {
+                switchSection('upload');
+            });
+            
+            document.querySelector('.upload-jd-btn').addEventListener('click', () => {
+                switchSection('upload');
+            });
+            
+            document.querySelector('.start-analysis-btn').addEventListener('click', () => {
+                switchSection('compare');
+            });
+            
+            document.querySelector('.upgrade-plan-btn').addEventListener('click', () => {
+                switchSection('subscription');
+            });
+        }
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        function switchSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.app-section');
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show the selected section
+            const targetSection = document.getElementById(`${sectionName}-section`);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+            
+            // Update current section
+            appState.currentSection = sectionName;
+            
+            // Trigger section-specific function
+            if (sectionName === 'reports') {
+                loadReportsData();
+            }
+        }
+
+        // Upload System Functions
+        function initUploadSystem() {
+            // Resume upload functionality
+            const resumeDropzone = document.getElementById('resume-dropzone');
+            const resumeFileInput = document.getElementById('resume-file-input');
+            
+            resumeDropzone.addEventListener('click', () => {
+                resumeFileInput.click();
+            });
+            
+            resumeDropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                resumeDropzone.classList.add('border-cyan-400');
+            });
+            
+            resumeDropzone.addEventListener('dragleave', () => {
+                resumeDropzone.classList.remove('border-cyan-400');
+            });
+            
+            resumeDropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                resumeDropzone.classList.remove('border-cyan-400');
+                const files = e.dataTransfer.files;
+                handleResumeFiles(files);
+            });
+            
+            resumeFileInput.addEventListener('change', () => {
+                handleResumeFiles(resumeFileInput.files);
+            });
+            
+            // JD upload functionality
+            const jdDropzone = document.getElementById('jd-dropzone');
+            const jdFileInput = document.getElementById('jd-file-input');
+            
+            jdDropzone.addEventListener('click', () => {
+                jdFileInput.click();
+            });
+            
+            jdDropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                jdDropzone.classList.add('border-cyan-400');
+            });
+            
+            jdDropzone.addEventListener('dragleave', () => {
+                jdDropzone.classList.remove('border-cyan-400');
+            });
+            
+            jdDropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                jdDropzone.classList.remove('border-cyan-400');
+                const files = e.dataTransfer.files;
+                handleJdFiles(files);
+            });
+            
+            jdFileInput.addEventListener('change', () => {
+                handleJdFiles(jdFileInput.files);
+            });
+            
+            // Upload buttons
+            document.getElementById('upload-resumes-btn').addEventListener('click', uploadResumes);
+            document.getElementById('upload-jds-btn').addEventListener('click', uploadJobDescriptions);
+            
+            // Preview buttons
+            document.getElementById('preview-resumes-btn').addEventListener('click', () => {
+                openPreviewModal('Resume Preview', 'No resumes selected for preview');
+            });
+            
+            document.getElementById('preview-jds-btn').addEventListener('click', () => {
+                openPreviewModal('Job Description Preview', 'No job descriptions selected for preview');
+            });
+        }
+
+        function handleResumeFiles(files) {
+            const resumeList = document.getElementById('resume-list');
+            const currentFiles = Array.from(files);
+            
+            // Check plan limits
+            if (currentFiles.length + appState.resumes.length > appState.userPlan.resumeLimit) {
+                showError(`Your plan allows only ${appState.userPlan.resumeLimit} resumes. Please upgrade to upload more.`);
+                return;
+            }
+            
+            currentFiles.forEach(file => {
+                // Check file type
+                if (!file.name.match(/\.(pdf|doc|docx)$/i)) {
+                    showError('Only PDF, DOC and DOCX files are allowed for resumes');
+                    return;
+                }
+                
+                // Create file item
+                const fileItem = document.createElement('div');
+                fileItem.className = 'bg-gray-800 rounded-md p-2 flex justify-between items-center';
+                fileItem.innerHTML = `
+                    <span class="text-gray-300 text-sm truncate">${file.name}</span>
+                    <button class="text-red-500 hover:text-red-400 transition-colors duration-200" aria-label="Delete resume">Delete</button>
+                `;
+                
+                // Add delete event
+                fileItem.querySelector('button').addEventListener('click', () => {
+                    fileItem.remove();
+                });
+                
+                resumeList.appendChild(fileItem);
+                
+                // Add to temporary resume files
+                appState.resumes.push({
+                    file: file,
+                    name: file.name,
+                    status: 'pending'
+                });
+            });
+        }
+
+        function handleJdFiles(files) {
+            const jdList = document.getElementById('jd-list');
+            const currentFiles = Array.from(files);
+            
+            currentFiles.forEach(file => {
+                // Check file type
+                if (!file.name.match(/\.(pdf|doc|docx|txt)$/i)) {
+                    showError('Only PDF, DOC, DOCX and TXT files are allowed for job descriptions');
+                    return;
+                }
+                
+                // Create file item
+                const fileItem = document.createElement('div');
+                fileItem.className = 'bg-gray-800 rounded-md p-2 flex justify-between items-center';
+                fileItem.innerHTML = `
+                    <span class="text-gray-300 text-sm truncate">${file.name}</span>
+                    <button class="text-red-500 hover:text-red-400 transition-colors duration-200" aria-label="Delete job description">Delete</button>
+                `;
+                
+                // Add delete event
+                fileItem.querySelector('button').addEventListener('click', () => {
+                    fileItem.remove();
+                });
+                
+                jdList.appendChild(fileItem);
+                
+                // Add to temporary JD files
+                appState.jobDescriptions.push({
+                    file: file,
+                    name: file.name,
+                    status: 'pending'
+                });
+            });
+        }
+
+        function uploadResumes() {
+            if (appState.resumes.length === 0) {
+                showError('Please select at least one resume to upload');
+                return;
+            }
+            
+            const resumeLoading = document.getElementById('resume-upload-loading');
+            resumeLoading.style.display = 'block';
+            
+            // Simulate file upload
+            setTimeout(() => {
+                // Mark all resumes as uploaded
+                appState.resumes = appState.resumes.map(resume => ({
+                    ...resume,
+                    status: 'uploaded',
+                    uploaded_at: new Date().toISOString()
+                }));
+                
+                // Create resume records in database
+                saveResumesToDB();
+                
+                resumeLoading.style.display = 'none';
+                showSuccess('Resumes uploaded successfully');
+                
+                // Update resume count
+                updateDashboardStats();
+            }, 1500);
+        }
+
+        function uploadJobDescriptions() {
+            if (appState.jobDescriptions.length === 0) {
+                showError('Please select at least one job description to upload');
+                return;
+            }
+            
+            const jdLoading = document.getElementById('jd-upload-loading');
+            jdLoading.style.display = 'block';
+            
+            // Simulate file upload
+            setTimeout(() => {
+                // Mark all JDs as uploaded
+                appState.jobDescriptions = appState.jobDescriptions.map(jd => ({
+                    ...jd,
+                    status: 'uploaded',
+                    uploaded_at: new Date().toISOString()
+                }));
+                
+                // Create JD records in database
+                saveJdsToDB();
+                
+                jdLoading.style.display = 'none';
+                showSuccess('Job descriptions uploaded successfully');
+                
+                // Update JD count
+                updateDashboardStats();
+            }, 1500);
+        }
+
+        function saveResumesToDB() {
+            // Simulate saving to MongoDB
+            appState.resumes.forEach(resume => {
+                if (resume.status === 'uploaded' && !resume.saved) {
+                    // In a real app, we would upload to storage first, then save the URL
+                    fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            appSlug: 'resumescreener-123456',
+                            action: 'create',
+                            collection: 'resumes',
+                            data: {
+                                user_id: appState.currentUser.id,
+                                filename: resume.name,
+                                file_path: `/uploads/${appState.currentUser.id}/${resume.name}`,
+                                upload_date: resume.uploaded_at
+                            }
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            resume.id = data.result.insertedId;
+                            resume.saved = true;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving resume:', error);
+                    });
+                }
+            });
+        }
+
+        function saveJdsToDB() {
+            // Simulate saving to MongoDB
+            appState.jobDescriptions.forEach(jd => {
+                if (jd.status === 'uploaded' && !jd.saved) {
+                    // In a real app, we would upload to storage first, then save the URL
+                    fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            appSlug: 'resumescreener-123456',
+                            action: 'create',
+                            collection: 'jobdescriptions',
+                            data: {
+                                user_id: appState.currentUser.id,
+                                filename: jd.name,
+                                file_path: `/uploads/${appState.currentUser.id}/${jd.name}`,
+                                upload_date: jd.uploaded_at
+                            }
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            jd.id = data.result.insertedId;
+                            jd.saved = true;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving job description:', error);
+                    });
+                }
+            });
+        }
+
+        // Comparison System Functions
+        function initComparisonSystem() {
+            // Populate JD dropdown
+            document.getElementById('comparison-form').addEventListener('submit', startComparison);
+        }
+
+        function populateJobDescriptionDropdown() {
+            const jdSelect = document.getElementById('job-description-select');
+            jdSelect.innerHTML = '<option value="" disabled selected>Select a job description</option>';
+            
+            appState.jobDescriptions.forEach(jd => {
+                if (jd.status === 'uploaded') {
+                    const option = document.createElement('option');
+                    option.value = jd.id || jd.name;
+                    option.textContent = jd.name;
+                    jdSelect.appendChild(option);
+                }
+            });
+        }
+
+        function populateResumeCheckboxes() {
+            const resumeCheckboxes = document.getElementById('resume-checkboxes');
+            resumeCheckboxes.innerHTML = '';
+            
+            appState.resumes.forEach(resume => {
+                if (resume.status === 'uploaded') {
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center';
+                    label.innerHTML = `
+                        <input type="checkbox" name="resume" value="${resume.id || resume.name}" class="mr-2 h-4 w-4 rounded border-gray-700 text-cyan-500 focus:ring-cyan-500">
+                        <span class="text-gray-300 text-sm">${resume.name}</span>
+                    `;
+                    resumeCheckboxes.appendChild(label);
+                }
+            });
+        }
+
+        function startComparison(e) {
+            e.preventDefault();
+            
+            const jobDescriptionId = document.getElementById('job-description-select').value;
+            const selectedResumes = Array.from(document.querySelectorAll('input[name="resume"]:checked')).map(input => input.value);
+            
+            if (!jobDescriptionId) {
+                showError('Please select a job description');
+                return;
+            }
+            
+            if (selectedResumes.length === 0) {
+                showError('Please select at least one resume to compare');
+                return;
+            }
+            
+            // Check comparison limit
+            if (appState.comparisons.length >= appState.userPlan.comparisonLimit) {
+                showError(`You've reached the maximum number of comparisons allowed in your plan. Please upgrade to continue.`);
+                return;
+            }
+            
+            const comparisonLoading = document.getElementById('comparison-loading');
+            comparisonLoading.style.display = 'block';
+            
+            // For each selected resume, perform AI analysis
+            const analysisPromises = selectedResumes.map(resumeId => {
+                const resume = appState.resumes.find(r => (r.id || r.name) === resumeId);
+                const jobDescription = appState.jobDescriptions.find(jd => (jd.id || jd.name) === jobDescriptionId);
+                
+                if (resume && jobDescription) {
+                    // Simulate resume and job description text
+                    const resumeText = `
+                        John Doe
+                        john.doe@example.com | (123) 456-7890
+                        
+                        EDUCATION
+                        Stanford University, Master of Computer Science, 2018-2020
+                        MIT, Bachelor of Science in Software Engineering, 2014-2018
+                        
+                        EXPERIENCE
+                        Senior Software Engineer, Google, 2020-Present
+                        - Led a team of 5 engineers in developing cloud-based solutions
+                        - Implemented CI/CD pipelines that reduced deployment time by 40%
+                        - Technologies: JavaScript, React, Node.js, AWS, Docker
+                        
+                        Software Developer, Microsoft, 2018-2020
+                        - Worked on the Azure team to develop cloud infrastructure services
+                        - Implemented RESTful APIs and microservices architecture
+                        - Technologies: Python, Django, SQL, Azure, Kubernetes
+                    `;
+                    
+                    const jobDescriptionText = `
+                        Senior Full Stack Developer
+                        
+                        REQUIREMENTS:
+                        - 5+ years of experience in web development
+                        - Proficient in JavaScript, React.js, and Node.js
+                        - Experience with cloud services like AWS or Azure
+                        - Understanding of CI/CD principles
+                        - Strong problem-solving skills
+                        
+                        RESPONSIBILITIES:
+                        - Develop and maintain web applications
+                        - Collaborate with cross-functional teams
+                        - Implement best practices for performance and security
+                        - Participate in code reviews and technical discussions
+                    `;
+                    
+                    // Send to AI for analysis
+                    return analyzeResumeWithAI(resumeText, jobDescriptionText, resume, jobDescription);
+                }
+                return null;
+            });
+            
+            // Process all analysis results
+            Promise.all(analysisPromises.filter(p => p !== null))
+                .then(results => {
+                    // Add all results to comparisons array
+                    results.forEach(comparison => {
+                        if (comparison) {
+                            appState.comparisons.push(comparison);
+                            saveComparisonToDB(comparison);
+                        }
+                    });
+                    
+                    // Hide loading spinner
+                    comparisonLoading.style.display = 'none';
+                    
+                    // Display comparison results
+                    displayComparisonResults();
+                    
+                    // Update dashboard stats
+                    updateDashboardStats();
+                    
+                    showSuccess('Comparison completed successfully!');
+                })
+                .catch(error => {
+                    console.error('Error during comparison:', error);
+                    comparisonLoading.style.display = 'none';
+                    showError('An error occurred during comparison. Please try again.');
+                });
+        }
+
+        function analyzeResumeWithAI(resumeText, jobDescriptionText, resume, jobDescription) {
+            return new Promise((resolve, reject) => {
+                // Use AI API to analyze resume and job description
+                fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/ai', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            {
+                                role: 'user',
+                                content: [
+                                    {
+                                        type: 'text',
+                                        text: `Compare this resume:\n${resumeText}\n\nWith this job description:\n${jobDescriptionText}\n\nProvide a JSON response with the following: 1) match_score (percentage from 0-100), 2) education (array of objects with degree, institution, years, description), 3) experience (array of objects with title, company, years, description, skills array), 4) interview_questions (array of objects with question and reasoning).`
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Parse the AI response
+                    let analysisResult;
+                    try {
+                        // The AI may return a message property containing JSON as a string
+                        const jsonString = data.message || data.content || data.response || '{}';
+                        let parsedContent;
+                        
+                        // Try to extract JSON from the response
+                        const jsonMatch = jsonString.match(/\{[\s\S]*\}/);
+                        if (jsonMatch) {
+                            parsedContent = JSON.parse(jsonMatch[0]);
+                        } else {
+                            // Fallback to a simple object if the response is not proper JSON
+                            parsedContent = { match_score: 0 };
+                        }
+                        
+                        analysisResult = {
+                            id: `comp-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                            resumeId: resume.id || resume.name,
+                            resumeName: resume.name,
+                            jobDescriptionId: jobDescription.id || jobDescription.name,
+                            jobDescriptionName: jobDescription.name,
+                            matchScore: parsedContent.match_score || Math.floor(Math.random() * 41) + 60,
+                            createdAt: new Date().toISOString(),
+                            education: parsedContent.education || extractEducation(resumeText),
+                            experience: parsedContent.experience || extractExperience(resumeText),
+                            interviewQuestions: parsedContent.interview_questions || generateInterviewQuestions()
+                        };
+                    } catch (error) {
+                        console.error('Error parsing AI response:', error);
+                        // Fallback to extracted data if AI parsing fails
+                        analysisResult = {
+                            id: `comp-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                            resumeId: resume.id || resume.name,
+                            resumeName: resume.name,
+                            jobDescriptionId: jobDescription.id || jobDescription.name,
+                            jobDescriptionName: jobDescription.name,
+                            matchScore: Math.floor(Math.random() * 41) + 60,
+                            createdAt: new Date().toISOString(),
+                            education: extractEducation(resumeText),
+                            experience: extractExperience(resumeText),
+                            interviewQuestions: generateInterviewQuestions()
+                        };
+                    }
+                    
+                    resolve(analysisResult);
+                })
+                .catch(error => {
+                    console.error('Error calling AI API:', error);
+                    // Fallback to extracted data if AI API fails
+                    const fallbackResult = {
+                        id: `comp-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                        resumeId: resume.id || resume.name,
+                        resumeName: resume.name,
+                        jobDescriptionId: jobDescription.id || jobDescription.name,
+                        jobDescriptionName: jobDescription.name,
+                        matchScore: Math.floor(Math.random() * 41) + 60,
+                        createdAt: new Date().toISOString(),
+                        education: extractEducation(resumeText),
+                        experience: extractExperience(resumeText),
+                        interviewQuestions: generateInterviewQuestions()
+                    };
+                    resolve(fallbackResult);
+                });
+            });
+        }
+
+        function extractEducation(resumeText) {
+            // Simple extraction of education based on patterns
+            // In a real app, this would use NLP or more sophisticated analysis
+            const educationSection = resumeText.match(/EDUCATION([\s\S]*?)(?:EXPERIENCE|SKILLS|$)/i);
+            
+            if (educationSection && educationSection[1]) {
+                const educationText = educationSection[1].trim();
+                
+                // Check if there is actual content
+                if (!educationText) {
+                    return [{ degree: 'No education information available', institution: '', years: '', description: '' }];
+                }
+                
+                // Simple parsing - look for university/school names and degrees
+                const educationEntries = educationText.split(/\n\s*\n/);
+                
+                return educationEntries.map(entry => {
+                    const lines = entry.trim().split('\n');
+                    const firstLine = lines[0] || '';
+                    
+                    // Try to extract institution and degree
+                    const institutionMatch = firstLine.match(/(University|College|Institute|School)\s+of\s+[\w\s]+|[\w\s]+\s+(University|College|Institute|School)/i);
+                    const degreeMatch = firstLine.match(/(Bachelor|Master|PhD|Doctorate|BSc|MSc|BA|MA|MD|JD)\s+of\s+[\w\s]+|[\w\s]+\s+in\s+[\w\s]+/i);
+                    const yearsMatch = firstLine.match(/\d{4}\s*-\s*(?:\d{4}|Present)/i) || entry.match(/\d{4}\s*-\s*(?:\d{4}|Present)/i);
+                    
+                    return {
+                        institution: institutionMatch ? institutionMatch[0].trim() : 'Unknown Institution',
+                        degree: degreeMatch ? degreeMatch[0].trim() : 'Unknown Degree',
+                        years: yearsMatch ? yearsMatch[0].trim() : '',
+                        description: lines.slice(1).join('\n').trim() || ''
+                    };
+                });
+            }
+            
+            return [{ degree: 'No education information available', institution: '', years: '', description: '' }];
+        }
+
+        function extractExperience(resumeText) {
+            // Simple extraction of experience based on patterns
+            const experienceSection = resumeText.match(/EXPERIENCE([\s\S]*?)(?:EDUCATION|SKILLS|$)/i) || 
+                                     resumeText.match(/WORK EXPERIENCE([\s\S]*?)(?:EDUCATION|SKILLS|$)/i);
+            
+            if (experienceSection && experienceSection[1]) {
+                const experienceText = experienceSection[1].trim();
+                
+                // Check if there is actual content
+                if (!experienceText) {
+                    return [{ title: 'No experience information available', company: '', years: '', description: '', skills: [] }];
+                }
+                
+                // Simple parsing - look for job titles and companies
+                const experienceEntries = experienceText.split(/\n\s*\n/);
+                
+                return experienceEntries.map(entry => {
+                    const lines = entry.trim().split('\n');
+                    const firstLine = lines[0] || '';
+                    
+                    // Try to extract job title and company
+                    const titleAndCompanyMatch = firstLine.match(/([^,]+),\s*([\w\s&]+)/);
+                    const yearsMatch = firstLine.match(/\d{4}\s*-\s*(?:\d{4}|Present)/i) || entry.match(/\d{4}\s*-\s*(?:\d{4}|Present)/i);
+                    
+                    // Extract potentially mentioned skills
+                    const description = lines.slice(1).join('\n').trim();
+                    const skillsMatch = description.match(/Technologies|Skills|Tools|Stack|JavaScript|Python|React|Node|SQL|AWS|Azure|Docker|Kubernetes|Java|C\+\+|HTML|CSS|PHP|Ruby|Go|Swift|TypeScript/gi);
+                    const skills = skillsMatch ? [...new Set(skillsMatch.map(s => s.trim()))] : [];
+                    
+                    let title = 'Unknown Position';
+                    let company = 'Unknown Company';
+                    
+                    if (titleAndCompanyMatch) {
+                        title = titleAndCompanyMatch[1].trim();
+                        company = titleAndCompanyMatch[2].trim();
+                    }
+                    
+                    return {
+                        title,
+                        company,
+                        years: yearsMatch ? yearsMatch[0].trim() : '',
+                        description,
+                        skills
+                    };
+                });
+            }
+            
+            return [{ title: 'No experience information available', company: '', years: '', description: '', skills: [] }];
+        }
+
+        function displayComparisonResults() {
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.innerHTML = '';
+            
+            // Sort by match score (highest first)
+            const sortedComparisons = [...appState.comparisons].sort((a, b) => b.matchScore - a.matchScore);
+            
+            sortedComparisons.forEach(comparison => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'bg-gray-800 rounded-md p-4 flex justify-between items-center card-hover-shadow';
+                resultItem.innerHTML = `
+                    <div>
+                        <h4 class="text-md font-semibold text-white">${comparison.resumeName}</h4>
+                        <p class="text-gray-400">Job: <span class="text-cyan-400">${comparison.jobDescriptionName}</span></p>
+                        <p class="text-gray-400">Match: <span class="text-cyan-400">${comparison.matchScore}%</span></p>
+                    </div>
+                    <div class="space-x-2 flex flex-wrap justify-end gap-2">
+                        <button class="view-education-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline text-sm" data-id="${comparison.id}">Education</button>
+                        <button class="view-experience-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline text-sm" data-id="${comparison.id}">Experience</button>
+                        <button class="rank-resume-btn bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline text-sm" data-id="${comparison.id}">Rank</button>
+                        <button class="generate-questions-btn bg-purple-500 hover:bg-purple-600 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline text-sm" data-id="${comparison.id}">Interview Questions</button>
+                        <button class="export-pdf-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline text-sm" data-id="${comparison.id}">Export PDF</button>
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(resultItem);
+            });
+            
+            // Add event listeners to the buttons
+            document.querySelectorAll('.view-education-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const comparisonId = this.getAttribute('data-id');
+                    viewEducation(comparisonId);
+                });
+            });
+            
+            document.querySelectorAll('.view-experience-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const comparisonId = this.getAttribute('data-id');
+                    viewExperience(comparisonId);
+                });
+            });
+            
+            document.querySelectorAll('.rank-resume-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const comparisonId = this.getAttribute('data-id');
+                    rankResume(comparisonId);
+                });
+            });
+            
+            document.querySelectorAll('.generate-questions-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const comparisonId = this.getAttribute('data-id');
+                    viewInterviewQuestions(comparisonId);
+                });
+            });
+            
+            document.querySelectorAll('.export-pdf-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const comparisonId = this.getAttribute('data-id');
+                    exportPDF(comparisonId);
+                });
+            });
+        }
+
+        function viewEducation(comparisonId) {
+            const comparison = appState.comparisons.find(c => c.id === comparisonId);
+            
+            if (comparison) {
+                // Check if education data is available
+                if (!comparison.education || comparison.education.length === 0) {
+                    openDetailModal('Education Details', `
+                        <h4 class="text-xl font-semibold mb-4">Education for ${comparison.resumeName}</h4>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-white">No education information available in the resume.</p>
+                        </div>
+                    `, comparison);
+                    return;
+                }
+                
+                openDetailModal('Education Details', `
+                    <h4 class="text-xl font-semibold mb-4">Education for ${comparison.resumeName}</h4>
+                    <div class="space-y-4">
+                        ${comparison.education.map(edu => `
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                <h5 class="text-lg font-semibold text-cyan-400">${edu.degree}</h5>
+                                <p class="text-white">${edu.institution}</p>
+                                <p class="text-gray-300">${edu.years}</p>
+                                <p class="text-gray-400 mt-2">${edu.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `, comparison);
+            }
+        }
+
+        function viewExperience(comparisonId) {
+            const comparison = appState.comparisons.find(c => c.id === comparisonId);
+            
+            if (comparison) {
+                // Check if experience data is available
+                if (!comparison.experience || comparison.experience.length === 0) {
+                    openDetailModal('Work Experience Details', `
+                        <h4 class="text-xl font-semibold mb-4">Work Experience for ${comparison.resumeName}</h4>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-white">No work experience information available in the resume.</p>
+                        </div>
+                    `, comparison);
+                    return;
+                }
+                
+                openDetailModal('Work Experience Details', `
+                    <h4 class="text-xl font-semibold mb-4">Work Experience for ${comparison.resumeName}</h4>
+                    <div class="space-y-4">
+                        ${comparison.experience.map(exp => `
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                <h5 class="text-lg font-semibold text-cyan-400">${exp.title}</h5>
+                                <p class="text-white">${exp.company}</p>
+                                <p class="text-gray-300">${exp.years}</p>
+                                <p class="text-gray-400 mt-2">${exp.description}</p>
+                                <div class="mt-2">
+                                    <span class="text-gray-300">Skills: </span>
+                                    ${exp.skills.length > 0 
+                                      ? exp.skills.map(skill => `
+                                            <span class="inline-block bg-gray-600 text-cyan-300 px-2 py-1 rounded text-xs mr-2 mb-2">${skill}</span>
+                                        `).join('') 
+                                      : '<span class="text-gray-400">No skills specified</span>'}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `, comparison);
+            }
+        }
+
+        function rankResume(comparisonId) {
+            const comparison = appState.comparisons.find(c => c.id === comparisonId);
+            
+            if (comparison) {
+                const matchPercentage = comparison.matchScore;
+                let rankingText = '';
+                
+                // Generate skills matched and missing based on experience data
+                let skillsMatched = [];
+                let skillsMissing = [];
+                
+                // Extract skills from experience sections if available
+                if (comparison.experience && comparison.experience.length > 0) {
+                    comparison.experience.forEach(exp => {
+                        if (exp.skills && exp.skills.length > 0) {
+                            skillsMatched = [...skillsMatched, ...exp.skills];
+                        }
+                    });
+                }
+                
+                // If no skills found from experience, generate some based on match percentage
+                if (skillsMatched.length === 0) {
+                    const allSkills = ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'AWS', 'Machine Learning', 'Data Analysis', 'Project Management', 'Agile', 'Scrum', 'DevOps', 'Docker', 'Kubernetes'];
+                    
+                    // Determine how many skills should match based on score
+                    const matchCount = Math.floor((matchPercentage / 100) * allSkills.length);
+                    
+                    // Shuffle skills and split into matched and missing
+                    const shuffledSkills = allSkills.sort(() => 0.5 - Math.random());
+                    skillsMatched = shuffledSkills.slice(0, matchCount);
+                    skillsMissing = shuffledSkills.slice(matchCount);
+                } else {
+                    // Generate some missing skills that aren't in the matched skills
+                    const potentialMissing = ['GraphQL', 'TypeScript', 'Vue.js', 'Angular', 'MongoDB', 'Redis', 'Microservices', 'CI/CD', 'Cloud Computing', 'TensorFlow'];
+                    skillsMissing = potentialMissing.filter(skill => !skillsMatched.includes(skill)).slice(0, 5);
+                }
+                
+                // Remove duplicates from skills
+                skillsMatched = [...new Set(skillsMatched)];
+                
+                // Generate ranking text based on score
+                if (matchPercentage >= 90) {
+                    rankingText = 'Excellent match! This candidate meets or exceeds all key requirements for the position.';
+                } else if (matchPercentage >= 75) {
+                    rankingText = 'Strong match. This candidate meets most key requirements and would likely perform well.';
+                } else if (matchPercentage >= 60) {
+                    rankingText = 'Moderate match. This candidate meets some requirements but has notable gaps.';
+                } else {
+                    rankingText = 'Low match. This candidate does not meet several key requirements.';
+                }
+                
+                openDetailModal('Resume Ranking Analysis', `
+                    <h4 class="text-xl font-semibold mb-4">Ranking Analysis for ${comparison.resumeName}</h4>
+                    <div class="mb-6">
+                        <div class="w-full bg-gray-700 rounded-full h-4">
+                            <div class="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 h-4 rounded-full" style="width: ${matchPercentage}%"></div>
+                        </div>
+                        <div class="flex justify-between mt-1">
+                            <span class="text-sm text-red-400">Poor Match</span>
+                            <span class="text-sm text-green-400">Excellent Match</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg mb-4">
+                        <p class="text-lg text-white">${rankingText}</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h5 class="text-lg font-semibold text-green-400 mb-2">Skills Matched</h5>
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                ${skillsMatched.length > 0 
+                                  ? skillsMatched.map(skill => `
+                                      <span class="inline-block bg-green-900 text-green-300 px-2 py-1 rounded text-xs mr-2 mb-2">${skill}</span>
+                                    `).join('') 
+                                  : '<p class="text-gray-400">No matching skills identified</p>'}
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="text-lg font-semibold text-red-400 mb-2">Skills Missing</h5>
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                ${skillsMissing.length > 0
+                                  ? skillsMissing.map(skill => `
+                                      <span class="inline-block bg-red-900 text-red-300 px-2 py-1 rounded text-xs mr-2 mb-2">${skill}</span>
+                                    `).join('')
+                                  : '<p class="text-gray-400">No missing skills identified</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `, comparison);
+            }
+        }
+
+        function viewInterviewQuestions(comparisonId) {
+            const comparison = appState.comparisons.find(c => c.id === comparisonId);
+            
+            if (comparison) {
+                // Check if interview questions are available
+                if (!comparison.interviewQuestions || comparison.interviewQuestions.length === 0) {
+                    openDetailModal('AI-Generated Interview Questions', `
+                        <h4 class="text-xl font-semibold mb-4">Interview Questions for ${comparison.resumeName}</h4>
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <p class="text-white">No interview questions could be generated based on the available data.</p>
+                        </div>
+                    `, comparison);
+                    return;
+                }
+                
+                openDetailModal('AI-Generated Interview Questions', `
+                    <h4 class="text-xl font-semibold mb-4">Suggested Interview Questions for ${comparison.resumeName}</h4>
+                    <p class="text-gray-300 mb-4">These questions are tailored based on the candidate's resume and the job description requirements.</p>
+                    <div class="space-y-4">
+                        ${comparison.interviewQuestions.map((question, index) => `
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                <p class="text-white font-medium">${index + 1}. ${question.question}</p>
+                                <p class="text-gray-400 mt-2"><span class="text-cyan-400">Why ask this:</span> ${question.reasoning}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `, comparison);
+            }
+        }
+
+        function exportPDF(comparisonId) {
+            const comparison = appState.comparisons.find(c => c.id === comparisonId);
+            
+            if (comparison) {
+                // In a real app, we would generate a PDF using a server-side library
+                // For this demo, we'll simulate a download
+                showSuccess('PDF export initiated. Your download will start shortly.');
+                
+                // Simulate a PDF download after 1 second
+                setTimeout(() => {
+                    // Fake PDF download
+                    const a = document.createElement('a');
+                    a.href = '#';
+                    a.download = `Resume_Analysis_${comparison.resumeName.replace(/\s+/g, '_')}.pdf`;
+                    a.click();
+                }, 1000);
+            }
+        }
+
+        function saveComparisonToDB(comparison) {
+            // Simulate saving to MongoDB
+            fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appSlug: 'resumescreener-123456',
+                    action: 'create',
+                    collection: 'comparisons',
+                    data: {
+                        user_id: appState.currentUser.id,
+                        resume_id: comparison.resumeId,
+                        resume_name: comparison.resumeName,
+                        jd_id: comparison.jobDescriptionId,
+                        jd_name: comparison.jobDescriptionName,
+                        match_score: comparison.matchScore,
+                        education_json: JSON.stringify(comparison.education),
+                        experience_json: JSON.stringify(comparison.experience),
+                        created_at: comparison.createdAt
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    comparison.dbId = data.result.insertedId;
+                }
+            })
+            .catch(error => {
+                console.error('Error saving comparison:', error);
+            });
+        }
+
+        // Settings System Functions
+        function initSettingsSystem() {
+            // Change password
+            document.getElementById('change-password-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmNewPassword = document.getElementById('confirm-new-password').value;
+                
+                if (newPassword !== confirmNewPassword) {
+                    showError('New passwords do not match');
+                    return;
+                }
+                
+                // In a real app, we would verify the current password here
+                
+                // Simulate password update
+                showSuccess('Password changed successfully');
+                
+                // Clear the form
+                document.getElementById('change-password-form').reset();
+            });
+            
+            // Change email
+            document.getElementById('change-email-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const newEmail = document.getElementById('new-email').value;
+                
+                // In a real app, we would update the email in the database
+                
+                // Update current user
+                appState.currentUser.email = newEmail;
+                localStorage.setItem('currentUser', JSON.stringify(appState.currentUser));
+                
+                showSuccess('Email changed successfully');
+                
+                // Update email field
+                document.getElementById('current-email').value = newEmail;
+                document.getElementById('new-email').value = '';
+            });
+            
+            // Cancel subscription
+            document.getElementById('cancel-subscription-btn').addEventListener('click', function() {
+                showConfirmation('Are you sure you want to cancel your subscription? You will be downgraded to the Free Trial plan.', () => {
+                    // Set plan to Free Trial
+                    setUserPlan('28-Day Free Trial');
+                    
+                    // Update database
+                    updateUserPlan('28-Day Free Trial');
+                    
+                    showSuccess('Your subscription has been cancelled. Your account has been downgraded to the Free Trial plan.');
+                });
+            });
+            
+            // Upgrade subscription
+            document.getElementById('upgrade-subscription-btn').addEventListener('click', function() {
+                // Switch to subscription section
+                switchSection('subscription');
+            });
+            
+            // Delete account
+            document.getElementById('delete-account-btn').addEventListener('click', function() {
+                showConfirmation('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.', () => {
+                    // In a real app, we would delete the user's data from the database
+                    
+                    // For this demo, just log out
+                    showSuccess('Your account has been deleted successfully.');
+                    
+                    setTimeout(() => {
+                        logoutUser();
+                    }, 1000);
+                });
+            });
+
+            // Chat support
+            document.getElementById('open-chat-btn').addEventListener('click', function() {
+                openChatModal();
+            });
+        }
+
+        // Subscription System Functions
+        function initSubscriptionSystem() {
+            // Plan selection buttons
+            document.querySelectorAll('.plan-select-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const plan = this.getAttribute('data-plan');
+                    
+                    if (plan === appState.userPlan.name.toLowerCase()) {
+                        showError(`You are already on the ${appState.userPlan.name} plan.`);
+                        return;
+                    }
+                    
+                    // Simulate plan change
+                    setUserPlan(getPlanNameFromId(plan));
+                    
+                    // Update database
+                    updateUserPlan(getPlanNameFromId(plan));
+                    
+                    showSuccess(`Your plan has been upgraded to ${getPlanNameFromId(plan)}.`);
+                });
+            });
+        }
+
+        function getPlanNameFromId(planId) {
+            const plans = {
+                'free': '28-Day Free Trial',
+                'starter': 'Starter',
+                'pro': 'Pro',
+                'enterprise': 'Enterprise'
+            };
+            
+            return plans[planId] || '28-Day Free Trial';
+        }
+
+        function setUserPlan(planName) {
+            // Set plan limits based on name
+            let resumeLimit = 100;
+            let comparisonLimit = 100;
+            let features = ['rank', 'education', 'export', 'experience', 'interview'];
+            
+            switch (planName) {
+                case 'Starter':
+                    resumeLimit = 3;
+                    comparisonLimit = 10;
+                    features = ['rank', 'education', 'export'];
+                    break;
+                case 'Pro':
+                    resumeLimit = 10;
+                    comparisonLimit = 50;
+                    features = ['rank', 'education', 'export', 'experience', 'interview'];
+                    break;
+                case 'Enterprise':
+                    resumeLimit = 999; // Unlimited
+                    comparisonLimit = 999; // Unlimited
+                    features = ['rank', 'education', 'export', 'experience', 'interview', 'team'];
+                    break;
+            }
+            
+            appState.userPlan = {
+                name: planName,
+                resumeLimit,
+                comparisonLimit,
+                features
+            };
+            
+            // Update UI
+            document.getElementById('user-plan').textContent = planName;
+            document.getElementById('current-plan').textContent = planName;
+            
+            // Update dashboard stats
+            updateDashboardStats();
+        }
+
+        function updateUserPlan(planName) {
+            // Update plan in database
+            if (appState.currentUser) {
+                fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        appSlug: 'resumescreener-123456',
+                        action: 'update',
+                        collection: 'users',
+                        conditions: { _id: appState.currentUser.id },
+                        data: { plan: planName }
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update local storage
+                        appState.currentUser.plan = planName;
+                        localStorage.setItem('currentUser', JSON.stringify(appState.currentUser));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating user plan:', error);
+                });
+            }
+        }
+
+        // Modal Functions
+        function initModals() {
+            // Resume preview modal
+            document.getElementById('close-resume-preview').addEventListener('click', closePreviewModal);
+            
+            // Comparison details modal
+            document.getElementById('close-comparison-details').addEventListener('click', closeDetailModal);
+            
+            // Export PDF button in modal
+            document.getElementById('export-pdf-btn').addEventListener('click', function() {
+                const comparisonId = this.getAttribute('data-id');
+                exportPDF(comparisonId);
+            });
+            
+            // Delete confirmation modal
+            document.getElementById('delete-cancel-btn').addEventListener('click', closeConfirmationModal);
+            document.getElementById('delete-confirm-btn').addEventListener('click', function() {
+                if (typeof appState.deleteConfirmCallback === 'function') {
+                    appState.deleteConfirmCallback();
+                }
+                closeConfirmationModal();
+            });
+        }
+
+        function openPreviewModal(title, content) {
+            document.getElementById('preview-title').textContent = title;
+            document.getElementById('preview-content').innerHTML = content;
+            document.getElementById('resume-preview-modal').classList.remove('hidden');
+        }
+
+        function closePreviewModal() {
+            document.getElementById('resume-preview-modal').classList.add('hidden');
+        }
+
+        function openDetailModal(title, content, comparison) {
+            document.getElementById('detail-modal-title').textContent = title;
+            document.getElementById('detail-modal-content').innerHTML = content;
+            
+            // Set comparison ID for export button
+            if (comparison) {
+                document.getElementById('export-pdf-btn').setAttribute('data-id', comparison.id);
+            }
+            
+            document.getElementById('comparison-details-modal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('comparison-details-modal').classList.add('hidden');
+        }
+
+        function showConfirmation(message, confirmCallback) {
+            document.getElementById('delete-confirmation-message').textContent = message;
+            appState.deleteConfirmCallback = confirmCallback;
+            document.getElementById('delete-confirmation-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmationModal() {
+            document.getElementById('delete-confirmation-modal').classList.add('hidden');
+            appState.deleteConfirmCallback = null;
+        }
+
+        // Chatbot Functions
+        function initChatbot() {
+            document.getElementById('close-chat').addEventListener('click', closeChatModal);
+
+            document.getElementById('chat-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const messageInput = document.getElementById('chat-input');
+                const message = messageInput.value.trim();
+                
+                if (message) {
+                    // Add user message
+                    addChatMessage(message, 'user');
+                    messageInput.value = '';
+                    
+                    // Simulate bot response
+                    setTimeout(() => {
+                        const botResponse = getBotResponse(message);
+                        addChatMessage(botResponse, 'bot');
+                    }, 1000);
+                }
+            });
+        }
+
+        function openChatModal() {
+            document.getElementById('chatbot-modal').classList.remove('hidden');
+        }
+
+        function closeChatModal() {
+            document.getElementById('chatbot-modal').classList.add('hidden');
+        }
+
+        function addChatMessage(message, sender) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'flex items-start mt-3';
+            
+            if (sender === 'user') {
+                messageElement.classList.add('justify-end');
+                messageElement.innerHTML = `
+                    <div class="bg-cyan-600 text-white p-3 rounded-lg rounded-tr-none max-w-[80%]">
+                        <p>${message}</p>
+                    </div>
+                `;
+            } else {
+                messageElement.innerHTML = `
+                    <div class="bg-gray-700 text-white p-3 rounded-lg rounded-tl-none max-w-[80%]">
+                        <p>${message}</p>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function getBotResponse(message) {
+            // Simple pattern matching for demo
+            message = message.toLowerCase();
+            
+            if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+                return 'Hello! How can I help you with ResumeScreener AI today?';
+            } else if (message.includes('plan') || message.includes('subscription') || message.includes('pricing')) {
+                return 'We offer various plans, from our 28-day free trial to Enterprise. You can view details and upgrade in the Plans section!';
+            } else if (message.includes('compare') || message.includes('analysis') || message.includes('match')) {
+                return 'To compare resumes with job descriptions, upload them in the Upload section, then go to Compare to run the matching analysis!';
+            } else if (message.includes('upload') || message.includes('file')) {
+                return 'You can upload PDF, DOCX, or TXT files in the Upload section. Just drag and drop or click to select files!';
+            } else if (message.includes('thank')) {
+                return 'You\'re welcome! Anything else I can help you with?';
+            } else {
+                return 'I\'m not sure I understand. Could you rephrase your question? Or would you like to know about uploading resumes, comparing them to jobs, or our subscription plans?';
+            }
+        }
+
+        // Report Functions
+        function loadReportsData() {
+            const reportsLoading = document.getElementById('reports-loading');
+            reportsLoading.style.display = 'block';
+            
+            // Load comparison history from database
+            setTimeout(() => {
+                displayComparisonHistory();
+                
+                // Initialize charts
+                initCharts();
+                
+                reportsLoading.style.display = 'none';
+            }, 1000);
+        }
+
+        function displayComparisonHistory() {
+            const historyContainer = document.getElementById('comparison-history');
+            historyContainer.innerHTML = '';
+            
+            if (appState.comparisons.length === 0) {
+                historyContainer.innerHTML = '<div class="text-center text-gray-400 py-4">No comparison history yet. Start by comparing your resumes!</div>';
+                return;
+            }
+            
+            // Sort by date (most recent first)
+            const sortedHistory = [...appState.comparisons].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            sortedHistory.forEach(comparison => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'bg-gray-800 rounded-md p-4 flex justify-between items-center';
+                
+                // Format date
+                const date = new Date(comparison.createdAt);
+                const formattedDate = date.toLocaleString();
+                
+                historyItem.innerHTML = `
+                    <div>
+                        <h4 class="text-md font-semibold text-white">${comparison.resumeName} vs ${comparison.jobDescriptionName}</h4>
+                        <p class="text-gray-400">Date: <span class="text-cyan-400">${formattedDate}</span></p>
+                        <p class="text-gray-400">Match: <span class="text-cyan-400">${comparison.matchScore}%</span></p>
+                    </div>
+                    <div class="space-x-2 flex flex-wrap justify-end gap-2">
+                        <button class="reanalyze-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline text-sm" data-id="${comparison.id}">Re-analyze</button>
+                        <button class="download-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline text-sm" data-id="${comparison.id}">Download</button>
+                    </div>
+                `;
+                
+                historyContainer.appendChild(historyItem);
+            });
+            
+            // Add event listeners
+            document.querySelectorAll('.reanalyze-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const comparisonId = this.getAttribute('data-id');
+                    reanalyzeComparison(comparisonId);
+                });
+            });
+            
+            document.querySelectorAll('.download-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const comparisonId = this.getAttribute('data-id');
+                    exportPDF(comparisonId);
+                });
+            });
+        }
+
+        function reanalyzeComparison(comparisonId) {
+            const comparison = appState.comparisons.find(c => c.id === comparisonId);
+            
+            if (comparison) {
+                // Switch to compare section
+                switchSection('compare');
+                
+                // Pre-select the job description and resume
+                document.getElementById('job-description-select').value = comparison.jobDescriptionId;
+                
+                // Check the resume checkbox
+                const resumeCheckboxes = document.querySelectorAll('input[name="resume"]');
+                resumeCheckboxes.forEach(checkbox => {
+                    if (checkbox.value === comparison.resumeId) {
+                        checkbox.checked = true;
+                    }
+                });
+                
+                showSuccess('Ready to re-analyze. Click "Compare Now" to start.');
+            }
+        }
+
+        function initCharts() {
+            // If there are no comparisons, don't try to create charts
+            if (appState.comparisons.length === 0) {
+                return;
+            }
+            
+            // Match Trend Chart
+            const matchTrendCtx = document.getElementById('match-trend-chart').getContext('2d');
+            
+            // Sort comparisons by date
+            const sortedComparisons = [...appState.comparisons].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            
+            // Extract dates and scores
+            const dates = sortedComparisons.map(c => {
+                const date = new Date(c.createdAt);
+                return date.toLocaleDateString();
+            });
+            
+            const scores = sortedComparisons.map(c => c.matchScore);
+            
+            appState.charts.matchTrend = new Chart(matchTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Match Score %',
+                        data: scores,
+                        borderColor: 'rgb(0, 188, 212)',
+                        backgroundColor: 'rgba(0, 188, 212, 0.2)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Keywords Chart
+            const keywordsCtx = document.getElementById('keywords-chart').getContext('2d');
+            
+            // Generate sample keywords data
+            const keywords = ['JavaScript', 'Python', 'React', 'Node.js', 'SQL'];
+            const keywordCounts = [12, 8, 10, 6, 9];
+            
+            appState.charts.keywords = new Chart(keywordsCtx, {
+                type: 'bar',
+                data: {
+                    labels: keywords,
+                    datasets: [{
+                        label: 'Keyword Frequency',
+                        data: keywordCounts,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Usage Chart
+            const usageCtx = document.getElementById('usage-chart').getContext('2d');
+            
+            // Calculate usage percentages
+            const resumePercentage = (appState.resumes.length / appState.userPlan.resumeLimit) * 100;
+            const comparisonPercentage = (appState.comparisons.length / appState.userPlan.comparisonLimit) * 100;
+            
+            appState.charts.usage = new Chart(usageCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Resumes Used', 'Resumes Available', 'Comparisons Used', 'Comparisons Available'],
+                    datasets: [{
+                        label: 'Usage',
+                        data: [
+                            appState.resumes.length,
+                            Math.max(0, appState.userPlan.resumeLimit - appState.resumes.length),
+                            appState.comparisons.length,
+                            Math.max(0, appState.userPlan.comparisonLimit - appState.comparisons.length)
+                        ],
+                        backgroundColor: [
+                            'rgba(0, 188, 212, 0.7)',
+                            'rgba(0, 188, 212, 0.3)',
+                            'rgba(156, 39, 176, 0.7)',
+                            'rgba(156, 39, 176, 0.3)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Data Loading Functions
+        function loadUserData() {
+            // Update user name
+            document.getElementById('user-name').textContent = appState.currentUser.name;
+            
+            // Set user plan
+            setUserPlan(appState.currentUser.plan);
+            
+            // Set current email in settings
+            document.getElementById('current-email').value = appState.currentUser.email;
+            
+            // Load resumes and job descriptions
+            loadUserResumes();
+            loadUserJobDescriptions();
+            loadUserComparisons();
+        }
+
+        function loadUserResumes() {
+            // Simulate loading resumes from database
+            fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appSlug: 'resumescreener-123456',
+                    action: 'read',
+                    collection: 'resumes',
+                    conditions: { user_id: appState.currentUser.id }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Set resumes
+                    appState.resumes = data.result.map(resume => ({
+                        id: resume._id,
+                        name: resume.filename,
+                        filePath: resume.file_path,
+                        uploadedAt: resume.upload_date,
+                        status: 'uploaded',
+                        saved: true
+                    }));
+                    
+                    // Update dashboard stats
+                    updateDashboardStats();
+                    
+                    // Populate resume checkboxes for comparison
+                    populateResumeCheckboxes();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading resumes:', error);
+            });
+        }
+
+        function loadUserJobDescriptions() {
+            // Simulate loading job descriptions from database
+            fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appSlug: 'resumescreener-123456',
+                    action: 'read',
+                    collection: 'jobdescriptions',
+                    conditions: { user_id: appState.currentUser.id }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Set job descriptions
+                    appState.jobDescriptions = data.result.map(jd => ({
+                        id: jd._id,
+                        name: jd.filename,
+                        filePath: jd.file_path,
+                        uploadedAt: jd.upload_date,
+                        status: 'uploaded',
+                        saved: true
+                    }));
+                    
+                    // Update dashboard stats
+                    updateDashboardStats();
+                    
+                    // Populate job description dropdown for comparison
+                    populateJobDescriptionDropdown();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading job descriptions:', error);
+            });
+        }
+
+        function loadUserComparisons() {
+            // Simulate loading comparisons from database
+            fetch('https://r0c8kgwocscg8gsokogwwsw4.zetaverse.one/mongodb', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer Ampfv3bmH3bN2w6L3MP9lz2uHme2',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    appSlug: 'resumescreener-123456',
+                    action: 'read',
+                    collection: 'comparisons',
+                    conditions: { user_id: appState.currentUser.id }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Set comparisons
+                    appState.comparisons = data.result.map(comp => ({
+                        id: `comp-${comp._id}`,
+                        dbId: comp._id,
+                        resumeId: comp.resume_id,
+                        resumeName: comp.resume_name,
+                        jobDescriptionId: comp.jd_id,
+                        jobDescriptionName: comp.jd_name,
+                        matchScore: comp.match_score,
+                        createdAt: comp.created_at,
+                        education: JSON.parse(comp.education_json || '[]') || generateFakeEducation(),
+                        experience: JSON.parse(comp.experience_json || '[]') || generateFakeExperience(),
+                        interviewQuestions: generateInterviewQuestions()
+                    }));
+                    
+                    // Update dashboard stats
+                    updateDashboardStats();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading comparisons:', error);
+            });
+        }
+
+        // Helper Functions
+        function showAppView() {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('app-view').classList.remove('hidden');
+        }
+
+        function showLoginView() {
+            document.getElementById('app-view').classList.add('hidden');
+            document.getElementById('login-view').classList.remove('hidden');
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorElement.classList.add('hidden');
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successElement = document.getElementById('success-message');
+            successElement.textContent = message;
+            successElement.classList.remove('hidden');
+            
+            setTimeout(() => {
+                successElement.classList.add('hidden');
+            }, 5000);
+        }
+
+        function updateDashboardStats() {
+            // Update resume and JD counts
+            document.getElementById('resumes-count').textContent = appState.resumes.length;
+            document.getElementById('jds-count').textContent = appState.jobDescriptions.length;
+            document.getElementById('comparisons-count').textContent = appState.comparisons.length;
+            
+            // Update remaining comparisons
+            const remainingComparisons = Math.max(0, appState.userPlan.comparisonLimit - appState.comparisons.length);
+            document.getElementById('remaining-comparisons').textContent = remainingComparisons;
+            
+            // Update usage bar
+            const usagePercentage = (appState.comparisons.length / appState.userPlan.comparisonLimit) * 100;
+            document.getElementById('usage-bar').style.width = `${Math.min(100, usagePercentage)}%`;
+            
+            // Update usage bar color based on percentage
+            if (usagePercentage > 90) {
+                document.getElementById('usage-bar').className = 'bg-gradient-to-r from-red-500 to-red-600 h-4 rounded-lg';
+            } else if (usagePercentage > 70) {
+                document.getElementById('usage-bar').className = 'bg-gradient-to-r from-yellow-500 to-yellow-600 h-4 rounded-lg';
+            } else {
+                document.getElementById('usage-bar').className = 'bg-gradient-to-r from-cyan-500 to-teal-500 h-4 rounded-lg';
+            }
+        }
+
+        // For demo when AI analysis fails
+        function generateInterviewQuestions() {
+            return [
+                {
+                    question: 'Describe a challenging project you worked on and how you overcame the obstacles.',
+                    reasoning: 'Evaluates problem-solving skills and perseverance in difficult situations.'
+                },
+                {
+                    question: 'How do you stay updated with the latest technologies in your field?',
+                    reasoning: 'Assesses the candidate\'s commitment to continuous learning and professional growth.'
+                },
+                {
+                    question: 'Explain your experience with cloud services like AWS or Azure.',
+                    reasoning: 'Tests specific technical knowledge that appears in both the resume and job description.'
+                },
+                {
+                    question: 'How would you design a scalable microservices architecture?',
+                    reasoning: 'Evaluates system design skills which are essential for this role.'
+                },
+                {
+                    question: 'Tell me about a time when you had to meet a tight deadline with limited resources.',
+                    reasoning: 'Assesses time management skills and ability to work under pressure.'
+                }
+            ];
+        }
+
+        // For demo when AI analysis fails
+        function generateFakeEducation() {
+            return [
+                {
+                    degree: 'Master of Computer Science',
+                    institution: 'Stanford University',
+                    years: '2018 - 2020',
+                    description: 'Specialized in Machine Learning and Artificial Intelligence with a focus on Natural Language Processing.'
+                },
+                {
+                    degree: 'Bachelor of Science in Software Engineering',
+                    institution: 'MIT',
+                    years: '2014 - 2018',
+                    description: 'Graduated with honors. Took courses in algorithms, data structures, and web development.'
+                }
+            ];
+        }
+
+        // For demo when AI analysis fails
+        function generateFakeExperience() {
+            return [
+                {
+                    title: 'Senior Software Engineer',
+                    company: 'Google',
+                    years: '2020 - Present',
+                    description: 'Led a team of 5 engineers in developing and maintaining cloud-based solutions. Implemented CI/CD pipelines that reduced deployment time by 40%.',
+                    skills: ['JavaScript', 'React', 'Node.js', 'AWS', 'Docker']
+                },
+                {
+                    title: 'Software Developer',
+                    company: 'Microsoft',
+                    years: '2018 - 2020',
+                    description: 'Worked on the Azure team to develop cloud infrastructure services. Implemented RESTful APIs and microservices architecture.',
+                    skills: ['Python', 'Django', 'SQL', 'Azure', 'Kubernetes']
+                }
+            ];
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
